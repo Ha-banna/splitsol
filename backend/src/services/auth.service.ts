@@ -3,14 +3,35 @@ import { getSupabase } from '../lib/supabase';
 import { signToken } from '../lib/jwt';
 import { buildAuthMessage, parseWalletAddress, verifyWalletSignature } from '../lib/solana-auth';
 import { verifyPrivyToken } from '../lib/privy';
+import { isSupabaseConfigured } from '../config/env';
 import { User } from '../types';
 import { badRequest } from '../utils/errors';
 
 const CHALLENGE_TTL_MS = 5 * 60 * 1000;
-const challenges = new Map<string, { wallet: string; message: string; expiresAt: number }>();
+
+/** Fallback when Supabase is not configured (local dev / unit tests). */
+const memoryChallenges = new Map<
+  string,
+  { wallet: string; message: string; expiresAt: number }
+>();
 
 function rowToUser(row: Record<string, unknown>): User {
   return row as unknown as User;
+}
+
+async function purgeExpiredChallenges(): Promise<void> {
+  if (!isSupabaseConfigured()) {
+    const now = Date.now();
+    for (const [nonce, c] of memoryChallenges) {
+      if (c.expiresAt <= now) memoryChallenges.delete(nonce);
+    }
+    return;
+  }
+
+  await getSupabase()
+    .from('auth_challenges')
+    .delete()
+    .lt('expires_at', new Date().toISOString());
 }
 
 export async function createWalletChallenge(walletAddress: string) {
@@ -18,14 +39,55 @@ export async function createWalletChallenge(walletAddress: string) {
   const nonce = randomBytes(16).toString('hex');
   const timestamp = Date.now();
   const message = buildAuthMessage(nonce, timestamp);
+  const expiresAt = timestamp + CHALLENGE_TTL_MS;
 
-  challenges.set(nonce, {
-    wallet,
-    message,
-    expiresAt: timestamp + CHALLENGE_TTL_MS,
-  });
+  await purgeExpiredChallenges();
+
+  if (isSupabaseConfigured()) {
+    const { error } = await getSupabase().from('auth_challenges').insert({
+      nonce,
+      wallet_address: wallet,
+      message,
+      expires_at: new Date(expiresAt).toISOString(),
+    });
+    if (error) throw error;
+  } else {
+    memoryChallenges.set(nonce, { wallet, message, expiresAt });
+  }
 
   return { message, nonce, timestamp };
+}
+
+async function consumeChallenge(
+  wallet: string,
+  signedMessage: string,
+): Promise<boolean> {
+  if (isSupabaseConfigured()) {
+    const { data, error } = await getSupabase()
+      .from('auth_challenges')
+      .select('nonce')
+      .eq('wallet_address', wallet)
+      .eq('message', signedMessage)
+      .gt('expires_at', new Date().toISOString())
+      .maybeSingle();
+
+    if (error) throw error;
+    if (!data) return false;
+
+    await getSupabase().from('auth_challenges').delete().eq('nonce', data.nonce);
+    return true;
+  }
+
+  let matchedNonce: string | null = null;
+  for (const [nonce, c] of memoryChallenges) {
+    if (c.wallet === wallet && c.message === signedMessage && c.expiresAt > Date.now()) {
+      matchedNonce = nonce;
+      break;
+    }
+  }
+  if (!matchedNonce) return false;
+  memoryChallenges.delete(matchedNonce);
+  return true;
 }
 
 export async function authenticateWallet(
@@ -36,19 +98,10 @@ export async function authenticateWallet(
   const wallet = parseWalletAddress(walletAddress);
   verifyWalletSignature(wallet, signedMessage, signature);
 
-  let matchedNonce: string | null = null;
-  for (const [nonce, c] of challenges) {
-    if (c.wallet === wallet && c.message === signedMessage && c.expiresAt > Date.now()) {
-      matchedNonce = nonce;
-      break;
-    }
-  }
-
-  if (!matchedNonce) {
+  const validChallenge = await consumeChallenge(wallet, signedMessage);
+  if (!validChallenge) {
     throw badRequest('Invalid or expired authentication challenge. Request a new challenge first.');
   }
-
-  challenges.delete(matchedNonce);
 
   const user = await upsertUserByWallet(wallet);
   if (!user.wallet_address?.trim()) {

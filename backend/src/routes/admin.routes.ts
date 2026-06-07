@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response, Router } from 'express';
 import { renderAdminDashboard } from '../admin/dashboard';
 import { isAdminEnabled } from '../config/env';
+import { requireAdminKey } from '../middleware/adminAuth';
 import { getAdminStats } from '../services/admin.service';
 import { listFeedbackForAdmin } from '../services/feedback.service';
 
@@ -15,6 +16,7 @@ function adminOnly(_req: Request, res: Response, next: NextFunction) {
 }
 
 router.use(adminOnly);
+router.use(requireAdminKey);
 
 router.get('/stats', async (_req, res, next) => {
   try {

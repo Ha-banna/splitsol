@@ -16,8 +16,7 @@ import { apiRequest } from './api';
 import { MWA_APP_IDENTITY, MWA_CHAIN } from './mwa-config';
 import type { AuthResponse } from '@/types/api';
 
-const SOLANA_RPC =
-  process.env.EXPO_PUBLIC_HELIUS_RPC_URL ?? 'https://api.mainnet-beta.solana.com';
+import { PUBLIC_SOLANA_RPC } from './solana-rpc';
 
 const MWA_AUTH_TOKEN_KEY = 'splitsol-mwa-auth-token';
 
@@ -108,7 +107,7 @@ async function authorizeForPayment(
 
 async function resolveMinContextSlot(preferred?: number): Promise<number> {
   if (preferred != null && preferred > 0) return preferred;
-  const connection = new Connection(SOLANA_RPC, 'confirmed');
+  const connection = new Connection(PUBLIC_SOLANA_RPC, 'confirmed');
   return connection.getSlot('confirmed');
 }
 
@@ -150,7 +149,7 @@ async function signAndSendTransactionViaMwa(
     if (!signedTx) {
       throw signAndSendErr instanceof Error ? signAndSendErr : new Error(String(signAndSendErr));
     }
-    const connection = new Connection(SOLANA_RPC, 'confirmed');
+    const connection = new Connection(PUBLIC_SOLANA_RPC, 'confirmed');
     const signature = await connection.sendRawTransaction(signedTx.serialize(), {
       skipPreflight: false,
     });

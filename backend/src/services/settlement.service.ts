@@ -1,13 +1,18 @@
 import { getSupabase } from '../lib/supabase';
+import { parseWalletAddress } from '../lib/solana-auth';
+import {
+  verifyPeerTransferTransaction,
+  verifySettlementTransaction,
+} from '../lib/tx-verification';
 import { badRequest } from '../utils/errors';
 import { notifySettlementReceived } from './notification.service';
 import { assertGroupMember } from './group.service';
 import { getGroupBalances, getSimplifiedDebtsForGroup } from './balance.service';
+import { getUserById } from './user.service';
 import {
   assertSufficientUsdcBalance,
   buildSettlementTransaction,
   debtsForPayer,
-  getConnection,
   isSolanaRpcFailure,
   PLATFORM_FEE_USDC,
   serializeTransaction,
@@ -35,7 +40,12 @@ export async function prepareSettlement(
 ) {
   await assertGroupMember(groupId, userId);
 
-  const { members } = await getGroupBalances(groupId, userId);
+  const user = await getUserById(userId);
+  const payer = parseWalletAddress(payerWalletAddress);
+  if (parseWalletAddress(user.wallet_address) !== payer) {
+    throw badRequest('payer_wallet_address must match your account wallet');
+  }
+
   const fullDebts = await getSimplifiedDebtsForGroup(groupId, userId);
   const debts = debtsForPayer(fullDebts, userId, payerWalletAddress);
 
@@ -87,16 +97,20 @@ export async function confirmSettlement(
 
   const isDevMock = !env.isProduction && txSignature.startsWith('devmock_');
 
+  const payerDebts = (await getSimplifiedDebtsForGroup(groupId, userId)).filter(
+    (d) => d.from_user_id === userId,
+  );
+
   if (!isDevMock) {
     if (!isSolanaConfigured()) {
       throw badRequest('On-chain settlement required but Solana RPC is not configured');
     }
-    const connection = getConnection();
-    const status = await connection.getSignatureStatus(txSignature);
-
-    if (!status.value?.confirmationStatus) {
-      throw badRequest('Transaction not yet confirmed. Try again in a few seconds.');
-    }
+    const user = await getUserById(userId);
+    await verifySettlementTransaction(
+      txSignature,
+      user.wallet_address,
+      payerDebts.map((d) => ({ to_wallet: d.to_wallet, amount_usdc: d.amount_usdc })),
+    );
   }
 
   const { data: existing } = await getSupabase()
@@ -109,9 +123,6 @@ export async function confirmSettlement(
     throw badRequest('Settlement already recorded');
   }
 
-  const payerDebts = (await getSimplifiedDebtsForGroup(groupId, userId)).filter(
-    (d) => d.from_user_id === userId,
-  );
   const debtTotal = payerDebts.reduce((sum, d) => sum + d.amount_usdc, 0);
   const totalAmount = debtTotal + PLATFORM_FEE_USDC;
 

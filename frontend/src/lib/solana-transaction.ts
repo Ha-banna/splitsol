@@ -3,8 +3,7 @@ import { Buffer } from 'buffer';
 import { Platform } from 'react-native';
 import { getBrowserSolanaWallet } from './solana-wallet';
 
-const DEFAULT_RPC =
-  process.env.EXPO_PUBLIC_HELIUS_RPC_URL ?? 'https://api.mainnet-beta.solana.com';
+import { PUBLIC_SOLANA_RPC } from './solana-rpc';
 
 type TxCapableWallet = {
   signAndSendTransaction?(transaction: Transaction): Promise<{ signature: string }>;
@@ -62,7 +61,7 @@ export async function signAndSendSerializedTransaction(
 
     if (typeof raw.signTransaction === 'function') {
       const signed = await raw.signTransaction(tx);
-      const connection = new Connection(DEFAULT_RPC, 'confirmed');
+      const connection = new Connection(PUBLIC_SOLANA_RPC, 'confirmed');
       const sig = await connection.sendRawTransaction(signed.serialize(), {
         skipPreflight: false,
       });

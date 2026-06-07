@@ -60,13 +60,25 @@ export const env = {
 
   isProduction: trimEnv('NODE_ENV', 'development') === 'production',
 
-  /** Enable local admin dashboard at /admin (default: on in development only) */
+  /** Enable admin dashboard at /admin in production (requires ADMIN_API_KEY) */
   adminEnabled: trimEnv('ADMIN_ENABLED', '') === 'true',
+
+  /** Required in production when admin is enabled — send as X-Admin-Key header */
+  adminApiKey: trimEnv('ADMIN_API_KEY'),
+
+  /** Comma-separated allowed CORS origins; empty uses environment defaults */
+  corsOrigins: trimEnv('CORS_ORIGINS')
+    .split(',')
+    .map((o) => o.trim())
+    .filter(Boolean),
 };
 
-/** Admin UI + stats API — local dev by default; set ADMIN_ENABLED=true to force on */
+/** Admin UI + stats API — on in development; production requires ADMIN_ENABLED + ADMIN_API_KEY */
 export function isAdminEnabled(): boolean {
-  return !env.isProduction || env.adminEnabled;
+  if (env.isProduction) {
+    return env.adminEnabled && Boolean(env.adminApiKey);
+  }
+  return true;
 }
 
 export function assertSupabaseConfigured(): void {
@@ -97,7 +109,7 @@ export function assertProductionConfig(): void {
   if (!isSolanaConfigured()) {
     throw new Error('HELIUS_API_KEY and PLATFORM_WALLET_ADDRESS are required in production');
   }
-  if (isAdminEnabled()) {
-    console.warn('WARNING: ADMIN_ENABLED=true — admin routes are exposed without authentication');
+  if (env.adminEnabled && !env.adminApiKey) {
+    throw new Error('ADMIN_API_KEY is required when ADMIN_ENABLED=true in production');
   }
 }

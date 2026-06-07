@@ -1,11 +1,11 @@
 import { getSupabase } from '../lib/supabase';
+import { verifyPeerTransferTransaction } from '../lib/tx-verification';
 import { badRequest } from '../utils/errors';
 import { notifyPeerTransferReceived } from './notification.service';
 import { getUserById, getUserByUsername } from './user.service';
 import {
   assertSufficientUsdcBalance,
   buildPeerTransferTransaction,
-  getConnection,
   isSolanaRpcFailure,
   serializeTransaction,
 } from './solana.service';
@@ -120,17 +120,20 @@ export async function confirmPeerTransfer(
     throw badRequest('Invalid recipient');
   }
 
+  const fromUser = await getUserById(fromUserId);
+
   const isDevMock = !env.isProduction && input.tx_signature.startsWith('devmock_');
 
   if (!isDevMock) {
     if (!isSolanaConfigured()) {
       throw badRequest('On-chain transfer required but Solana RPC is not configured');
     }
-    const connection = getConnection();
-    const status = await connection.getSignatureStatus(input.tx_signature);
-    if (!status.value?.confirmationStatus) {
-      throw badRequest('Transaction not yet confirmed. Try again in a few seconds.');
-    }
+    await verifyPeerTransferTransaction(
+      input.tx_signature,
+      fromUser.wallet_address,
+      toUser.wallet_address,
+      amount,
+    );
   }
 
   const { data: existing } = await getSupabase()

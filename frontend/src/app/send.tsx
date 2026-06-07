@@ -211,7 +211,7 @@ export default function SendScreen() {
               <TextInput
                 className="bg-slate-800 text-white rounded-2xl px-4 py-3 border border-slate-700 mb-2"
                 placeholder="@username or name"
-                placeholderTextcolor="#ffffff"
+                placeholderTextColor="#ffffff"
                 autoCapitalize="none"
                 value={recipientQuery}
                 onChangeText={setRecipientQuery}
@@ -254,7 +254,7 @@ export default function SendScreen() {
           <TextInput
             className="bg-slate-800 text-white text-2xl font-bold rounded-2xl px-4 py-4 border border-slate-700 mb-4"
             placeholder="0.00"
-            placeholderTextcolor="#ffffff"
+            placeholderTextColor="#ffffff"
             keyboardType={amountKeyboardType}
             inputMode="decimal"
             value={amount}
@@ -265,7 +265,7 @@ export default function SendScreen() {
           <TextInput
             className="bg-slate-800 text-white rounded-2xl px-4 py-3 border border-slate-700 mb-6"
             placeholder="Dinner, rent, thanks..."
-            placeholderTextcolor="#ffffff"
+            placeholderTextColor="#ffffff"
             value={note}
             onChangeText={setNote}
           />

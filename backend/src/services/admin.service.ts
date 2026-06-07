@@ -102,11 +102,17 @@ function isDevMockTx(tx: string | null | undefined): boolean {
   return typeof tx === 'string' && tx.startsWith('devmock_');
 }
 
+function headCountQuery(table: string) {
+  return getSupabase().from(table).select('*', { count: 'exact', head: true });
+}
+
+type HeadCountQuery = ReturnType<typeof headCountQuery>;
+
 async function countTable(
   table: string,
-  filter?: (q: ReturnType<ReturnType<typeof getSupabase>['from']>) => ReturnType<ReturnType<typeof getSupabase>['from']>,
+  filter?: (q: HeadCountQuery) => HeadCountQuery,
 ): Promise<number> {
-  let q = getSupabase().from(table).select('*', { count: 'exact', head: true });
+  let q = headCountQuery(table);
   if (filter) q = filter(q);
   const { count, error } = await q;
   if (error) throw error;

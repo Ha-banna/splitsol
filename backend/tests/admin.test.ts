@@ -111,6 +111,24 @@ describe('admin routes', () => {
     expect(res.body.items[0].category).toBe('bug');
   });
 
+  it('requires admin API key when ADMIN_API_KEY is set', async () => {
+    vi.stubEnv('ADMIN_API_KEY', 'test-admin-secret');
+    vi.resetModules();
+    const { createApp: createSecuredApp } = await import('../src/app');
+    const app = createSecuredApp({ enableRateLimit: false });
+
+    const denied = await request(app).get('/admin/stats');
+    expect(denied.status).toBe(401);
+
+    const allowed = await request(app)
+      .get('/admin/stats')
+      .set('X-Admin-Key', 'test-admin-secret');
+    expect(allowed.status).toBe(200);
+
+    delete process.env.ADMIN_API_KEY;
+    vi.resetModules();
+  });
+
   it('returns 404 in production when ADMIN_ENABLED is not set', async () => {
     vi.doMock('../src/config/env', async () => {
       const actual = await vi.importActual<typeof import('../src/config/env')>('../src/config/env');

@@ -123,7 +123,7 @@ export default function SetupUsernameScreen() {
             <TextInput
               className="bg-slate-800 text-white text-lg rounded-2xl px-4 py-3.5 border border-slate-700 mb-6 min-h-[52px]"
               placeholder="Alex, Sam, etc."
-              placeholderTextcolor="#ffffff"
+              placeholderTextColor="#ffffff"
               autoFocus
               value={displayName}
               onChangeText={(text) =>
@@ -142,7 +142,7 @@ export default function SetupUsernameScreen() {
               <TextInput
                 className="flex-1 text-white text-lg min-h-[28px]"
                 placeholder="yourname"
-                placeholderTextcolor="#ffffff"
+                placeholderTextColor="#ffffff"
                 autoCapitalize="none"
                 autoCorrect={false}
                 value={username}

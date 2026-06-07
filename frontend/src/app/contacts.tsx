@@ -165,7 +165,7 @@ export default function ContactsScreen() {
                   <TextInput
                     className="flex-1 text-white text-base py-0"
                     placeholder="username"
-                    placeholderTextcolor="#ffffff"
+                    placeholderTextColor="#ffffff"
                     autoCapitalize="none"
                     value={usernameInput}
                     onChangeText={(t) => setUsernameInput(t.replace(/^@/, ''))}

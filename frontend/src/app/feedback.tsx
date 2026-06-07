@@ -107,7 +107,7 @@ export default function FeedbackScreen() {
           <TextInput
             className="bg-slate-800 text-white rounded-2xl px-4 py-3 border border-slate-700 min-h-[160px] mb-2"
             placeholder="Describe what happened or what you'd like to see…"
-            placeholderTextcolor="#ffffff"
+            placeholderTextColor="#ffffff"
             value={message}
             onChangeText={setMessage}
             multiline

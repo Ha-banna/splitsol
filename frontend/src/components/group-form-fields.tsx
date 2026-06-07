@@ -39,7 +39,7 @@ export function GroupFormFields({
           <TextInput
             className="flex-1 text-white text-lg"
             placeholder="Trip to Paris, Apartment 4B..."
-            placeholderTextcolor="#ffffff"
+            placeholderTextColor="#ffffff"
             value={name}
             onChangeText={(text) => onNameChange(clamp(text, GROUP_NAME_MAX_LENGTH))}
             maxLength={GROUP_NAME_MAX_LENGTH}
@@ -59,7 +59,7 @@ export function GroupFormFields({
           <TextInput
             className="text-white text-base min-h-[80px]"
             placeholder="Trip notes, apartment details..."
-            placeholderTextcolor="#ffffff"
+            placeholderTextColor="#ffffff"
             value={description}
             onChangeText={(text) => onDescriptionChange(clamp(text, GROUP_DESCRIPTION_MAX_LENGTH))}
             maxLength={GROUP_DESCRIPTION_MAX_LENGTH}

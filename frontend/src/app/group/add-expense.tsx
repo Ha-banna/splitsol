@@ -230,7 +230,7 @@ export default function AddExpenseScreen() {
               <TextInput
                 className="text-5xl font-extrabold text-white min-w-[120px] text-center"
                 placeholder="0.00"
-                placeholderTextcolor="#ffffff"
+                placeholderTextColor="#ffffff"
                 keyboardType={amountKeyboardType}
                 inputMode="decimal"
                 value={amount}
@@ -247,7 +247,7 @@ export default function AddExpenseScreen() {
               <TextInput
                 className="flex-1 text-white text-lg"
                 placeholder="Dinner, Airbnb, Taxi..."
-                placeholderTextcolor="#ffffff"
+                placeholderTextColor="#ffffff"
                 value={description}
                 onChangeText={setDescription}
               />
@@ -311,7 +311,7 @@ export default function AddExpenseScreen() {
                   <TextInput
                     className="text-white text-lg font-semibold min-w-[72px] text-right"
                     placeholder="0.00"
-                    placeholderTextcolor="#ffffff"
+                    placeholderTextColor="#ffffff"
                     keyboardType={amountKeyboardType}
                     inputMode="decimal"
                     value={splitAmounts[member.user_id] ?? ''}
@@ -358,7 +358,7 @@ export default function AddExpenseScreen() {
                   <TextInput
                     className="text-white text-lg font-semibold min-w-[56px] text-right"
                     placeholder="0"
-                    placeholderTextcolor="#ffffff"
+                    placeholderTextColor="#ffffff"
                     keyboardType={amountKeyboardType}
                     inputMode="decimal"
                     value={splitPercentages[member.user_id] ?? ''}

@@ -187,7 +187,7 @@ export default function ProfileScreen() {
                 onChangeText={(t) => setUsername(t.replace(/^@+/, ''))}
                 autoCapitalize="none"
                 placeholder="yourname"
-                placeholderTextcolor="#ffffff"
+                placeholderTextColor="#ffffff"
                 maxLength={20}
               />
             </View>

@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { parseWalletAddress } from '../lib/solana-auth';
 import { AuthedRequest, requireAuth } from '../middleware/auth';
 import { asyncHandler } from '../middleware/asyncHandler';
 import { settlementLimiter } from '../middleware/rateLimit';
@@ -22,10 +23,13 @@ router.post(
   '/prepare',
   settlementLimiter,
   asyncHandler(async (req, res) => {
-    const { userId } = req as AuthedRequest;
+    const { userId, walletAddress } = req as AuthedRequest;
     const { payer_wallet_address } = req.body;
     if (!payer_wallet_address) {
       throw badRequest('payer_wallet_address is required');
+    }
+    if (parseWalletAddress(payer_wallet_address) !== parseWalletAddress(walletAddress)) {
+      throw badRequest('payer_wallet_address must match your session wallet');
     }
     const prepared = await settlementService.prepareSettlement(
       req.params.id,
