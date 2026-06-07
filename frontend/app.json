@@ -1,0 +1,70 @@
+{
+  "expo": {
+    "name": "SplitSOL",
+    "slug": "splitsol",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/app-icon.png",
+    "scheme": "splitsol",
+    "userInterfaceStyle": "dark",
+    "backgroundColor": "#0b101b",
+    "ios": {
+      "icon": "./assets/images/app-icon.png",
+      "bundleIdentifier": "com.splitsol.app"
+    },
+    "android": {
+      "package": "com.splitsol.app",
+      "googleServicesFile": "./google-services.json",
+      "icon": "./assets/images/app-icon.png",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/app-icon.png",
+        "backgroundColor": "#0b101b"
+      },
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "output": "static",
+      "favicon": "./assets/images/app-icon.png"
+    },
+    "extra": {
+      "solanaCluster": "mainnet-beta",
+      "router": {
+        "headOrigin": "chrome-extension://bfnaelmomeimhlpmgjnjophhpkkoljpa"
+      },
+      "eas": {
+        "projectId": "c6657384-73f1-466c-ae08-1922a62a0b68"
+      }
+    },
+    "plugins": [
+      "expo-dev-client",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/images/notification-icon.png",
+          "color": "#a855f7",
+          "defaultChannel": "default"
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow SplitSOL to access your photos to set a group icon."
+        }
+      ],
+      "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#0b101b",
+          "image": "./assets/images/app-icon.png",
+          "imageWidth": 160,
+          "resizeMode": "contain"
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true,
+      "reactCompiler": true
+    }
+  }
+}

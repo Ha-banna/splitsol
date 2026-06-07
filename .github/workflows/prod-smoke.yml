@@ -1,0 +1,30 @@
+name: Production Smoke Test
+
+# Run manually after deploying backend to production.
+# GitHub → Actions → Production Smoke Test → Run workflow
+on:
+  workflow_dispatch:
+    inputs:
+      api_url:
+        description: 'Production API base URL (no trailing slash)'
+        required: true
+        default: 'https://api.splitsol.app'
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Run production smoke tests
+        env:
+          PROD_API_URL: ${{ inputs.api_url }}
+        run: node scripts/prod-smoke.mjs

@@ -1,0 +1,22 @@
+import { getRandomValues as expoCryptoGetRandomValues } from 'expo-crypto';
+import { Buffer } from 'buffer';
+
+global.Buffer = Buffer;
+
+class Crypto {
+  getRandomValues = expoCryptoGetRandomValues;
+}
+
+const webCrypto = typeof crypto !== 'undefined' ? crypto : new Crypto();
+
+(() => {
+  if (typeof crypto === 'undefined') {
+    Object.defineProperty(global, 'crypto', {
+      configurable: true,
+      enumerable: true,
+      get: () => webCrypto,
+    });
+  }
+})();
+
+import 'expo-router/entry';

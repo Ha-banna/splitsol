@@ -1,0 +1,13 @@
+-- SplitSOL RLS notes
+--
+-- The API must use SUPABASE_SERVICE_ROLE_KEY (service_role JWT), which bypasses RLS.
+-- Error 42501 on insert almost always means the anon/public key was pasted into
+-- SUPABASE_SERVICE_ROLE_KEY by mistake.
+--
+-- If you enable RLS in the Supabase dashboard, the service role still bypasses it.
+-- Run this file only if you need explicit policies for client-side Supabase access later.
+
+-- Example: read own profile when using Supabase Auth (future)
+-- ALTER TABLE users ENABLE ROW LEVEL SECURITY;
+-- CREATE POLICY "users_select_own" ON users FOR SELECT
+--   USING (auth.uid()::text = id::text);

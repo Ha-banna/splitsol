@@ -1,0 +1,32 @@
+# Dependencies
+node_modules/
+
+# Environment secrets — never commit
+.env
+.env.*
+!.env.example
+
+/backend/.env*
+/frontend/.env*
+
+tos.html
+privacy-policy.html
+privacy policy.html
+remember.txt
+
+# Build output
+dist/
+build/
+.expo/
+android/app/build/
+ios/build/
+
+# Signing keys
+*.jks
+*.keystore
+*.p12
+
+# OS / editor
+.DS_Store
+Thumbs.db
+*.log
