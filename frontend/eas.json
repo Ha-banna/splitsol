@@ -21,6 +21,20 @@
       "android": {
         "buildType": "app-bundle"
       }
+    },
+    "dapp-store": {
+      "distribution": "store",
+      "android": {
+        "buildType": "apk"
+      },
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://splitsol-production1.up.railway.app/v1",
+        "EXPO_PUBLIC_MWA_IDENTITY_URI": "https://splitsol-production1.up.railway.app",
+        "EXPO_PUBLIC_SOLANA_CLUSTER": "mainnet-beta",
+        "EXPO_PUBLIC_USDC_MINT": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+        "EXPO_PUBLIC_PRIVY_APP_ID": "cmpaa34oj00ae0djs829x7jbp",
+        "EXPO_PUBLIC_PLATFORM_WALLET": "6uh271kVcE8G5ZHdF9aouFidWc2a6o72Bz4aqr9GJfVF"
+      }
     }
   }
 }

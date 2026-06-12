@@ -34,6 +34,16 @@ router.patch(
   }),
 );
 
+router.delete(
+  '/me',
+  requireAuth,
+  asyncHandler(async (req, res) => {
+    const { userId } = req as AuthedRequest;
+    await userService.deleteUserAccount(userId);
+    res.status(204).send();
+  }),
+);
+
 router.post(
   '/me/avatar',
   requireAuth,

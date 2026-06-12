@@ -16,6 +16,8 @@
     "android:go": "expo start --go --android",
     "android:dev": "cross-env EXPO_USE_DEV_CLIENT=1 expo start --dev-client --android",
     "build:android:dev": "cross-env EXPO_USE_DEV_CLIENT=1 eas build --profile development --platform android",
+    "gen:mwa-icon": "node scripts/gen-mwa-icon.mjs",
+    "build:dapp-store": "npm run gen:mwa-icon && eas build --profile dapp-store --platform android",
     "ios": "expo start --ios",
     "web": "expo start --web",
     "lint": "expo lint",
@@ -74,6 +76,7 @@
     "@types/bs58": "^4.0.4",
     "@types/react": "~19.2.2",
     "cross-env": "^7.0.3",
+    "sharp": "^0.35.1",
     "typescript": "~5.9.2"
   },
   "private": true

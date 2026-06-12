@@ -11,6 +11,8 @@ type ScreenHeaderProps = {
   variant?: 'back' | 'close';
   fallbackHref?: Href;
   rightAction?: React.ReactNode;
+  /** When set, back/close uses this instead of router navigation */
+  onClose?: () => void;
 };
 
 export function ScreenHeader({
@@ -20,11 +22,16 @@ export function ScreenHeader({
   variant = 'back',
   fallbackHref = '/',
   rightAction,
+  onClose,
 }: ScreenHeaderProps) {
   const router = useRouter();
   const iconName = variant === 'close' ? 'x' : 'chevron-left';
 
   const handleBack = () => {
+    if (onClose) {
+      onClose();
+      return;
+    }
     if (router.canGoBack()) {
       router.back();
       return;

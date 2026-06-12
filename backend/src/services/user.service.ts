@@ -134,3 +134,44 @@ export function toPublicProfile(user: User): PublicUserProfile {
     wallet_address: user.wallet_address,
   };
 }
+
+/**
+ * Anonymize the user and detach them from social/group membership.
+ * Historical expenses and transfers stay for other group members (FK integrity).
+ * The same wallet can register again as a new account.
+ */
+export async function deleteUserAccount(id: string): Promise<void> {
+  await getUserById(id);
+  const db = getSupabase();
+
+  const { error: membersError } = await db.from('group_members').delete().eq('user_id', id);
+  if (membersError) throw membersError;
+
+  const { error: contactsError } = await db
+    .from('user_contacts')
+    .delete()
+    .or(`owner_id.eq.${id},contact_user_id.eq.${id}`);
+  if (contactsError) throw contactsError;
+
+  const { error: requestsError } = await db
+    .from('friend_requests')
+    .delete()
+    .or(`from_user_id.eq.${id},to_user_id.eq.${id}`);
+  if (requestsError) throw requestsError;
+
+  const { error } = await db
+    .from('users')
+    .update({
+      wallet_address: `deleted:${id}`,
+      display_name: 'Deleted account',
+      username: null,
+      avatar_url: null,
+      email: null,
+      privy_id: null,
+      push_token: null,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', id);
+
+  if (error) throw error;
+}

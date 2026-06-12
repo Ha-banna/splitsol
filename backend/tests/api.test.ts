@@ -304,6 +304,17 @@ describe('Users routes', () => {
     expect(res.status).toBe(200);
   });
 
+  it('DELETE /v1/users/me requires auth', async () => {
+    const res = await request(app).delete('/v1/users/me');
+    expect(res.status).toBe(401);
+  });
+
+  it('GET /app-icon.png is served for MWA identity', async () => {
+    const res = await request(app).get('/app-icon.png');
+    expect(res.status).toBe(200);
+    expect(res.headers['content-type']).toMatch(/image\/png/);
+  });
+
   it('GET /v1/users/search requires query', async () => {
     const res = await request(app).get('/v1/users/search').set('Authorization', authHeader());
     expect(res.status).toBe(400);

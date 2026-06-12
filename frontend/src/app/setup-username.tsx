@@ -10,10 +10,13 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, type Href } from 'expo-router';
+import { useQueryClient } from '@tanstack/react-query';
 import { AppLogo } from '@/components/app-logo';
 import { LegalConsentText } from '@/components/legal-consent-text';
+import { ScreenHeader } from '@/components/screen-header';
 import { LoadingButton } from '@/components/ui/loading-button';
 import { DISPLAY_NAME_MAX_LENGTH } from '@/lib/constants';
+import { confirmAction } from '@/lib/confirm';
 import { useUpdateMe, useUsernameAvailable } from '@/hooks/queries';
 import { showErrorAlert } from '@/lib/errors';
 import { isValidUsername, normalizeUsername } from '@/lib/username';
@@ -28,9 +31,12 @@ function initialDisplayName(current: string | undefined, walletAddress: string):
 
 export default function SetupUsernameScreen() {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const token = useAuthStore((s) => s.token);
   const user = useAuthStore((s) => s.user);
+  const clearSession = useAuthStore((s) => s.clearSession);
   const updateMe = useUpdateMe();
+  const isFirstTimeSetup = !user?.username;
 
   useEffect(() => {
     if (!token || !user?.wallet_address?.trim()) {
@@ -76,6 +82,24 @@ export default function SetupUsernameScreen() {
     !updateMe.isPending &&
     !checkingAvailability;
 
+  const handleClose = async () => {
+    if (isFirstTimeSetup) {
+      const confirmed = await confirmAction(
+        'Log out?',
+        'You can finish setting up your profile when you sign in again.',
+        'Log out',
+        true,
+      );
+      if (!confirmed) return;
+      clearSession();
+      queryClient.clear();
+      router.replace('/onboarding');
+      return;
+    }
+
+    router.replace('/(tabs)' as Href);
+  };
+
   const handleSave = async () => {
     if (!canContinue) return;
     try {
@@ -90,7 +114,12 @@ export default function SetupUsernameScreen() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-slate-900">
+    <SafeAreaView className="flex-1 bg-slate-900" edges={['top', 'bottom', 'left', 'right']}>
+      <ScreenHeader
+        variant="close"
+        title={isFirstTimeSetup ? 'Set up profile' : 'Edit username'}
+        onClose={() => void handleClose()}
+      />
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         className="flex-1"

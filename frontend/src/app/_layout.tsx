@@ -1,14 +1,12 @@
 import '../global.css';
 import { Feather } from '@expo/vector-icons';
-import { Image } from 'expo-image';
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import React, { useEffect } from 'react';
-import { StyleSheet, View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { QueryProvider } from '@/providers/QueryProvider';
-import { BRAND, LOGO_IMAGE } from '@/lib/branding';
+import { BRAND } from '@/lib/branding';
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
@@ -16,19 +14,6 @@ const screenOptions = {
   headerShown: false,
   contentStyle: { backgroundColor: BRAND.background },
 };
-
-const splashStyles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: BRAND.background,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  logo: {
-    width: 140,
-    height: 140,
-  },
-});
 
 export default function RootLayout() {
   const [fontsLoaded, fontError] = useFonts({
@@ -41,19 +26,8 @@ export default function RootLayout() {
     }
   }, [fontsLoaded, fontError]);
 
-  if (!fontsLoaded && !fontError) {
-    return (
-      <View style={splashStyles.container}>
-        <Image
-          source={LOGO_IMAGE}
-          style={splashStyles.logo}
-          contentFit="contain"
-          accessibilityLabel="SplitSOL"
-        />
-      </View>
-    );
-  }
-
+  // Keep Stack mounted while fonts load — swapping the tree for a splash View
+  // breaks expo-router linking ("state update on unmounted component").
   return (
     <SafeAreaProvider>
       <QueryProvider>

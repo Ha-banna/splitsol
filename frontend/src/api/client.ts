@@ -24,6 +24,8 @@ export const api = {
     push_token?: string;
   }) => apiRequest<ApiUser>('/users/me', { method: 'PATCH', body: JSON.stringify(body) }),
 
+  deleteMyAccount: () => apiRequest<void>('/users/me', { method: 'DELETE' }),
+
   uploadMyAvatar: (body: { image_base64: string; mime_type: string }) =>
     apiRequest<ApiUser>('/users/me/avatar', { method: 'POST', body: JSON.stringify(body) }),
 

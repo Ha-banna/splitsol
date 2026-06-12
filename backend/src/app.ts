@@ -1,6 +1,7 @@
 import cors from 'cors';
 import express from 'express';
 import helmet from 'helmet';
+import path from 'path';
 import { env, isAdminEnabled, isSupabaseConfigured } from './config/env';
 import { decodeSupabaseKeyRole } from './lib/supabase';
 import { errorHandler } from './middleware/errorHandler';
@@ -49,6 +50,9 @@ export function createApp(options: CreateAppOptions = {}) {
   if (enableRateLimit) {
     app.use(globalLimiter);
   }
+
+  // MWA identity icon + public assets (app-icon.png at site root)
+  app.use(express.static(path.join(__dirname, '..', 'public'), { maxAge: '7d' }));
 
   app.get('/health', (_req, res) => {
     if (env.isProduction) {

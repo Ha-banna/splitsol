@@ -18,8 +18,10 @@ import { useQueryClient } from '@tanstack/react-query';
 import { AppLogo } from '@/components/app-logo';
 import { UserAvatar } from '@/components/user-avatar';
 import { LoadingButton } from '@/components/ui/loading-button';
-import { useUpdateMe, useUploadMyAvatar, useUsernameAvailable } from '@/hooks/queries';
+import { useDeleteAccount, useUpdateMe, useUploadMyAvatar, useUsernameAvailable } from '@/hooks/queries';
 import { showAppAlert } from '@/lib/app-alert';
+import { ApiError } from '@/lib/api';
+import { confirmDestructive } from '@/lib/confirm';
 import { showErrorAlert } from '@/lib/errors';
 import { pickUserAvatarImage, type PickedUserAvatar } from '@/lib/pick-user-avatar';
 import { formatUsername, isValidUsername, normalizeUsername } from '@/lib/username';
@@ -34,6 +36,7 @@ export default function ProfileScreen() {
   const uiUser = user ? toUiUser(user) : null;
   const updateMe = useUpdateMe();
   const uploadAvatar = useUploadMyAvatar();
+  const deleteAccount = useDeleteAccount();
 
   const [displayName, setDisplayName] = useState(user?.display_name ?? '');
   const [username, setUsername] = useState(user?.username ?? '');
@@ -104,6 +107,26 @@ export default function ProfileScreen() {
     clearSession();
     queryClient.clear();
     router.replace('/onboarding');
+  };
+
+  const handleDeleteAccount = async () => {
+    const confirmed = await confirmDestructive(
+      'Delete account?',
+      'This removes your profile, friends, and group memberships. Expense history in shared groups may remain for other members. This cannot be undone.',
+    );
+    if (!confirmed) return;
+
+    try {
+      await deleteAccount.mutateAsync();
+      router.replace('/onboarding');
+      showAppAlert('Account deleted', 'Your account has been removed.');
+    } catch (err) {
+      const message =
+        err instanceof ApiError && err.status === 404
+          ? 'Account deletion is not available on the server yet. Redeploy the latest backend to Railway, then try again.'
+          : undefined;
+      showErrorAlert(err, message ?? 'Could not delete account');
+    }
   };
 
   const handleEnableNotifications = async () => {
@@ -330,17 +353,39 @@ export default function ProfileScreen() {
         <Text className="text-white font-bold uppercase tracking-wider text-xs mb-3 ml-1">
           Security
         </Text>
-        <TouchableOpacity
-          className="bg-slate-800 rounded-2xl p-4 border border-slate-700/50 flex-row justify-between items-center mb-8"
-          onPress={handleLogout}
-        >
-          <View className="flex-row items-center">
-            <View className="h-8 w-8 rounded-full bg-rose-500/20 items-center justify-center mr-3">
-              <Feather name="log-out" size={16} color="#f43f5e" />
+        <View className="bg-slate-800 rounded-3xl border border-slate-700/50 mb-8 overflow-hidden">
+          <TouchableOpacity
+            className="p-4 flex-row justify-between items-center border-b border-slate-700/50"
+            onPress={handleLogout}
+          >
+            <View className="flex-row items-center">
+              <View className="h-8 w-8 rounded-full bg-rose-500/20 items-center justify-center mr-3">
+                <Feather name="log-out" size={16} color="#f43f5e" />
+              </View>
+              <Text className="text-rose-400 text-lg font-bold">Log out</Text>
             </View>
-            <Text className="text-rose-400 text-lg font-bold">Disconnect Wallet</Text>
-          </View>
-        </TouchableOpacity>
+          </TouchableOpacity>
+          <TouchableOpacity
+            className="p-4 flex-row justify-between items-center"
+            onPress={() => void handleDeleteAccount()}
+            disabled={deleteAccount.isPending}
+          >
+            <View className="flex-row items-center flex-1 mr-3">
+              <View className="h-8 w-8 rounded-full bg-rose-500/20 items-center justify-center mr-3">
+                <Feather name="trash-2" size={16} color="#f43f5e" />
+              </View>
+              <View className="flex-1">
+                <Text className="text-rose-400 text-lg font-bold">Delete account</Text>
+                <Text className="text-white text-sm">
+                  Permanently remove your profile and data
+                </Text>
+              </View>
+            </View>
+            {deleteAccount.isPending ? (
+              <Feather name="loader" size={18} color="#f43f5e" />
+            ) : null}
+          </TouchableOpacity>
+        </View>
 
         <View className="h-12" />
       </ScrollView>

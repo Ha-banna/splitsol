@@ -268,6 +268,19 @@ export function useUpdateMe() {
   });
 }
 
+export function useDeleteAccount() {
+  const clearSession = useAuthStore((s) => s.clearSession);
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: () => api.deleteMyAccount(),
+    onSuccess: () => {
+      clearSession();
+      queryClient.clear();
+    },
+  });
+}
+
 export function useUploadMyAvatar() {
   const setSession = useAuthStore((s) => s.setSession);
   const token = useAuthStore((s) => s.token);
