@@ -1,6 +1,5 @@
 import type { Chain } from '@solana-mobile/mobile-wallet-adapter-protocol';
 import Constants from 'expo-constants';
-import { MWA_APP_ICON_DATA_URI } from './mwa-app-icon';
 
 /**
  * Base URL for MWA app identity (no trailing slash).
@@ -25,13 +24,13 @@ function resolveMwaIdentityUri(): string {
 
 /**
  * Solana Mobile / Seeker — Mobile Wallet Adapter app identity.
- * `uri` must be absolute. `icon` is an embedded data URI so wallets do not
- * need to fetch a remote file (reliable on Seeker / Phantom when splitsol.app is down).
+ * `uri` must be absolute; `icon` must be relative to `uri` (not a full URL or data URI).
+ * Resolves to https://splitsol-production1.up.railway.app/app-icon.png
  */
 export const MWA_APP_IDENTITY = {
   name: 'SplitSOL',
   uri: resolveMwaIdentityUri(),
-  icon: MWA_APP_ICON_DATA_URI,
+  icon: 'app-icon.png',
 };
 
 const cluster =

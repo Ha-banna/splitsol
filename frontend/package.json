@@ -17,7 +17,7 @@
     "android:dev": "cross-env EXPO_USE_DEV_CLIENT=1 expo start --dev-client --android",
     "build:android:dev": "cross-env EXPO_USE_DEV_CLIENT=1 eas build --profile development --platform android",
     "gen:mwa-icon": "node scripts/gen-mwa-icon.mjs",
-    "build:dapp-store": "npm run gen:mwa-icon && eas build --profile dapp-store --platform android",
+    "build:dapp-store": "eas build --profile dapp-store --platform android",
     "ios": "expo start --ios",
     "web": "expo start --web",
     "lint": "expo lint",
